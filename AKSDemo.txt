@@ -134,3 +134,10 @@ Result
 ----------------------------
 myacraksdemo12345.azurecr.io
 
+STEP 3-Enable ACR Build from GitHub
+------------------------------------------
+We will tell Azure: 👉 “Build Docker image directly from GitHub source”
+
+--Create build for Product API
+
+az acr build --registry myacraksdemo12345 --image product-api:v1 --file ProductAPI/Dockerfile https://github.com/saurabhukumar/aksdemo.git
