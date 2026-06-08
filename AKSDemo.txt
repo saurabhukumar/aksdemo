@@ -1,4 +1,8 @@
 
+Pending-
+kubectl, kubelet, Internal service-to-service communication, sidecar container, how pipeline manages this deployment, how https to apply here, how nginx will apply here
+
+
 AKS Learning
 =============================
 
@@ -15,7 +19,7 @@ Kubelet
 Containerd
 Kubectl
 AKS
-Internal service-to-service communication
+Internal service-to-service communication ??
 Scaling
 Rolling updates
 
@@ -165,3 +169,161 @@ Output:
 NAME                                STATUS   ROLES    AGE   VERSION
 aks-nodepool1-18407925-vmss000000   Ready    <none>   11m   v1.34.8
 aks-nodepool1-18407925-vmss000001   Ready    <none>   11m   v1.34.8
+
+STEP 6 — Deploy Product API to AKS
+
+--Create k8s folder inside the solution
+--Create file: product-deployment.yaml inside k8s folder
+--Create file: product-service.yaml inside k8s folder
+
+--Move to project solution path 
+
+--Run below to apply deployment and service
+kubectl apply -f k8s/
+
+Output:
+
+deployment.apps/product-api created
+service/product-service created
+
+--Verify deployment
+
+kubectl get deployments
+
+Output:
+
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+product-api   2/2     2            2           4m31s
+
+The Deployment object is responsible for keeping the requested number of Pods running.
+
+--Verify Pods
+
+kubectl get pods
+
+Output:
+
+product-api-576869898b-5ndgp   1/1     Running   0          5m49s
+product-api-576869898b-w6kdv   1/1     Running   0          5m49s
+
+Here You never created Pods directly. You created a Deployment. The Deployment created Pods for you.
+
+--Verify Services
+
+kubectl get svc
+
+Output:
+
+NAME              TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
+kubernetes        ClusterIP      10.0.0.1       <none>         443/TCP        88m
+product-service   LoadBalancer   10.0.243.243   4.188.118.76   80:30797/TCP   6m57s
+
+The Service provides: 
+Stable DNS name
+Stable IP
+Load balancing across Pods
+
+Without a Service, Pods are ephemeral.
+
+--Watch Pods Start
+
+kubectl get pods -w
+
+Output:
+
+NAME                           READY   STATUS    RESTARTS   AGE
+product-api-576869898b-5ndgp   1/1     Running   0          10m
+product-api-576869898b-w6kdv   1/1     Running   0          10m
+
+You'll see Pods move through: Pending, ContainerCreating, Running
+
+In the background, practical view of kubelet and containerd in action.
+Deployment
+    ↓
+Scheduler
+    ↓
+Node selected
+    ↓
+Kubelet
+    ↓
+Containerd
+    ↓
+Container starts
+
+--Check External IP 
+
+kubectl get svc frontend-service
+
+Output:
+
+NAME              TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
+product-service   LoadBalancer   10.0.243.243   4.188.118.76   80:30797/TCP   12m
+
+--Open your application
+
+http://4.188.118.76/product/test
+
+--Learn Logs. Most used command in kubernetes
+
+kubectl get pods
+
+Output:
+
+NAME                           READY   STATUS    RESTARTS   AGE
+product-api-576869898b-5ndgp   1/1     Running   0          14m
+product-api-576869898b-w6kdv   1/1     Running   0          14m
+
+Pick one POD to see the log
+
+kubectl logs product-api-576869898b-5ndgp
+
+--Describe for troubleshooting
+
+kubectl describe pod product-api-576869898b-5ndgp
+
+--Scale Pods
+
+kubectl scale deployment product-api --replicas=3
+
+Output:
+
+NAME                           READY   STATUS    RESTARTS   AGE
+product-api-576869898b-5ndgp   1/1     Running   0          22m
+product-api-576869898b-gjrw6   1/1     Running   0          18s
+product-api-576869898b-w6kdv   1/1     Running   0          22m
+
+kubectl get pods [to check updated no. of PODs]
+Deployment controls replica count.
+
+--Learn Service Load Balancing
+
+After scaling, product request will be distributed across 3 PODs
+
+--Learn Exec - To move to a container/pod shell
+
+kubectl exec -it product-api-576869898b-5ndgp -- sh
+
+--What if a Pod has multiple containers?
+
+kubectl exec -it <pod-name> -c <container_name> -- sh
+
+--Learn Rolling Updates. This ensure Zero-downtime deployments.
+
+Later, build:- product-api:v2
+
+Update Deployment:
+
+kubectl set image deployment/product-api product-api=myacr.azurecr.io/product-api:v2
+
+Watch:
+
+kubectl rollout status deployment/product-api
+
+--To find which node, the pod is running one
+
+kubectl get pods -o wide
+
+NAME                           NODE
+product-api-abc123             aks-nodepool1-12345-vmss000001
+frontend-api-def456            aks-nodepool1-12345-vmss000002
+
