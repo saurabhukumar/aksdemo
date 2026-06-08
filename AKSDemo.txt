@@ -141,3 +141,27 @@ We will tell Azure: 👉 “Build Docker image directly from GitHub source”
 --Create build for Product API
 
 az acr build --registry myacraksdemo12345 --image product-api:v1 --file ProductAPI/Dockerfile https://github.com/saurabhukumar/aksdemo.git
+
+az acr build --registry myacraksdemo12345 --image frontend-api:v1 --file FrontendAPI/Dockerfile https://github.com/saurabhukumar/aksdemo.git
+
+STEP 4 — Verify images in ACR
+
+az acr repository list --name myacraksdemo12345 --output table
+
+STEP 5 — Create AKS Cluster
+
+az aks create --resource-group rg-aks-demo --name aks-demo --node-count 2 --attach-acr myacraksdemo12345 --generate-ssh-keys
+
+--Connect Kubectl
+
+az aks get-credentials --resource-group rg-aks-demo --name aks-demo
+
+Output: Merged "aks-demo" as current context in C:\Users\saurabh.u.kumar\.kube\config
+
+--Verify
+kubectl get nodes
+
+Output:
+NAME                                STATUS   ROLES    AGE   VERSION
+aks-nodepool1-18407925-vmss000000   Ready    <none>   11m   v1.34.8
+aks-nodepool1-18407925-vmss000001   Ready    <none>   11m   v1.34.8
