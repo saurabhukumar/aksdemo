@@ -62,6 +62,8 @@ Runs docker build in cloud
 Stores image in ACR
 
 
+--STEP 1 — Create GitHub Repo
+
 --Create local git repo, Inside your solution folder:
 
 cd aks-poc
@@ -100,4 +102,35 @@ git branch -M main
 git push -u origin main
 
 --STEP2 — Create Azure Container Registry (ACR)
+
+--Open Powershell as Administrator
+--Azure Login
+
+az login
+
+Select subscription
+
+--Validate if the correct subscription has picked
+
+az account show
+
+--Create Resource Group
+
+az group create --name rg-aks-demo --location centralindia
+
+--Create ACR (ACR name must be globally unique)
+
+az acr create --resource-group rg-aks-demo --name myacraksdemo12345 --sku Basic
+
+--Enable admin (for simplicity in POC) [Optional]
+
+az acr update --name myacraksdemo12345 --admin-enabled true
+
+--Get login server
+
+az acr show --name myacraksdemo12345 --query loginServer --output table
+
+Result
+----------------------------
+myacraksdemo12345.azurecr.io
 
