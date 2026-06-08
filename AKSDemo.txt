@@ -1,0 +1,103 @@
+
+AKS Learning
+=============================
+
+This is an excellent AKS learning project because you can learn:
+
+Containers
+Docker Engine / Podman
+Container Registry
+Kubernetes basics
+Pods
+Deployments
+Services
+Kubelet
+Containerd
+Kubectl
+AKS
+Internal service-to-service communication
+Scaling
+Rolling updates
+
+--Big Picture
+.NET Application
+       ↓
+Docker Image
+       ↓
+Azure Container Registry (ACR)
+       ↓
+AKS Deployment
+       ↓
+Pod
+       ↓
+Service
+       ↓
+Load Balancer
+
+--Open Powershell as Administrator
+--Install Azure CLI
+
+--Verify Azure CLI
+az version
+
+--Install kubectl
+az aks install-cli
+
+--Verify kubectl version
+kubectl version --client
+
+Client Version: v1.36.1
+Kustomize Version: v5.8.1
+
+-------------------------------
+
+--Flow 
+
+GitHub code
+   ↓
+ACR fetches repo
+   ↓
+Runs docker build in cloud
+   ↓
+Stores image in ACR
+
+
+--Create local git repo, Inside your solution folder:
+
+cd aks-poc
+git init
+
+--Add your services
+
+aks-poc/
+ ├── ProductApi/
+ ├── FrontendApi/
+
+--Create .gitignore
+
+Inside aks-poc:
+
+bin/
+obj/
+.vs/
+*.user
+*.suo
+publish/
+
+--Commit code
+
+git add .
+git commit -m "Initial microservices setup"
+
+--Create GitHub repo
+
+aks-poc
+
+--Push code
+
+git remote add origin https://github.com/<your-username>/aks-poc.git
+git branch -M main
+git push -u origin main
+
+--STEP2 — Create Azure Container Registry (ACR)
+
